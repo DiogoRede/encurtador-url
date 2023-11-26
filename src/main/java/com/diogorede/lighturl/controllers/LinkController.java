@@ -6,6 +6,8 @@ import java.util.Base64;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,47 +53,55 @@ public class LinkController {
     @PostMapping("/cadastro")
     public ModelAndView cadastrar(LinkDto linkDto){
         ModelAndView model = new ModelAndView();
-        System.out.println(linkDto.url());
+        SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Optional<Usuario> usuarioOptional = usuarioService.findById(linkDto.id());
-        if(usuarioOptional.isEmpty()){
-            model.setViewName("/link/register");
-            model.addObject("mensagemErro", "Usuario não encontrado!");
-        }else{
-            try {
-                MessageDigest md = MessageDigest.getInstance("SHA-256");
-                byte[] hashBytes = md.digest(linkDto.url().getBytes());
-                
-                // Substituir "/" por "-" e "+" por "_"
-                String base64Hash = Base64.getEncoder().encodeToString(hashBytes)
-                        .replace("/", "-")
-                        .replace("+", "_");
-                
-                // Pegar os primeiros 10 caracteres do hash
-                String shortLink = base64Hash.substring(0, 10);
-                
-                System.out.println("Short Link: " + shortLink);
-                
-                Optional<Link> linkOptional = linkService.findByLinkEncurtado(shortLink);
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails)principal).getUsername();
+            Optional<Usuario> usuarioOptional = usuarioService.buscarPorEmail(username);
+            if(usuarioOptional.isEmpty()){
+                model.setViewName("/link/register");
+                model.addObject("mensagemErro", "Usuario não encontrado!");
+            }else{
+                try {
+                    MessageDigest md = MessageDigest.getInstance("SHA-256");
+                    byte[] hashBytes = md.digest(linkDto.url().getBytes());
+                    
+                    // Substituir "/" por "-" e "+" por "_"
+                    String base64Hash = Base64.getEncoder().encodeToString(hashBytes)
+                            .replace("/", "-")
+                            .replace("+", "_");
+                    
+                    // Pegar os primeiros 10 caracteres do hash
+                    String shortLink = base64Hash.substring(0, 10);
+                    
+                    System.out.println("Short Link: " + shortLink);
+                    
+                    Optional<Link> linkOptional = linkService.findByLinkEncurtado(shortLink);
 
-                if(linkOptional.isPresent()){
-                    model.setViewName("/link/register");
-                    model.addObject("mensagemErro", "Essa url já foi utilizada");
-                }else{
-                    Link link = linkService.save(new Link(linkDto.url(), shortLink, usuarioOptional.get()));
-                    if(link!=null){
+                    if(linkOptional.isPresent()){
+                        model.setViewName("/link/register");
+                        model.addObject("mensagemErro", "Essa url já foi utilizada");
+                    }else{
+                        Link link = new Link();
+                        link.setLink(linkDto.url());
+                        link.setLinkencurtado(shortLink);
+                        link.setUsuario(usuarioOptional.get());
+
+                        linkService.save(link);
                         model.setViewName("/link/success-register");
                         model.addObject("linkEncurtado", link.linkencurtado);
-                    }else{
-                        model.setViewName("/link/register");
-                        model.addObject("mensagemErro", "Não foi possível registar, tente mais tarde");
                     }
+                } catch (NoSuchAlgorithmException e) {
+                    model.setViewName("/link/register");
+                    model.addObject("mensagemErro", "Não foi possível registar, tente mais tarde");
                 }
-            } catch (NoSuchAlgorithmException e) {
-                model.setViewName("/link/register");
-                model.addObject("mensagemErro", "Não foi possível registar, tente mais tarde");
             }
+        } else {
+            model.setViewName("/auth/login");
         }
+
         return model;
     }
 }

@@ -12,7 +12,7 @@ import com.diogorede.lighturl.models.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario, String> {
     Usuario findByEmail(String email);
 
-    @Query("SELECT u.email FROM Usuario u WHERE u.email = :email")
+    @Query("SELECT u FROM Usuario u WHERE u.email = :email")
     Optional<Usuario> buscarEmail(String email);
 
     Optional<Usuario> findById(String id);

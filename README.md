@@ -9,8 +9,8 @@ Site para encurtar links e fazer um redirecionamento pelo próprio como intermed
 - Spring Boot 3
 	- Spring MVC
 	- Spring Security 6
-	- Spring ThymeLeaf
 	- Spring Data JPA
+    - ThymeLeaf
 - PostgreSQL
 
 ## Objetivo
