@@ -68,5 +68,4 @@ public class Link {
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
-
 }

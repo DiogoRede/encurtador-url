@@ -2,6 +2,7 @@ package com.diogorede.lighturl.controllers;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -17,8 +18,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.diogorede.lighturl.dtos.LinkDto;
+import com.diogorede.lighturl.models.AnaliseLink;
 import com.diogorede.lighturl.models.Link;
 import com.diogorede.lighturl.models.Usuario;
+import com.diogorede.lighturl.services.AnaliseLinkService;
 import com.diogorede.lighturl.services.LinkService;
 import com.diogorede.lighturl.services.UsuarioService;
 
@@ -31,6 +34,9 @@ public class LinkController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private AnaliseLinkService analiseLinkService;
 
     
     @GetMapping("/cadastro")
@@ -48,7 +54,6 @@ public class LinkController {
             Optional<Usuario> usuarioOptional = usuarioService.buscarPorEmail(username);
             if(usuarioOptional.isPresent()){
                 List<Link> links = linkService.findByLinksUsuario(username);
-                System.out.println(links.get(0).getLinkencurtado());
                 model.setViewName("link/list");
                 model.addObject("listLink", links);
             }
@@ -62,13 +67,35 @@ public class LinkController {
     @GetMapping("/{linkEncurtado}")
     public ModelAndView linkRedirect(@PathVariable(value = "linkEncurtado") String link){
         ModelAndView model = new ModelAndView("/link/redirect");
-        System.out.println(link);
-        
         //Otimizar essa busca para buscar apenas o link (está fazendo 2 select um de link e outro de usuario)
         Optional<Link> linkOptional = linkService.findByLinkEncurtado(link);
         if(linkOptional.isPresent()){
             model.addObject("link", linkOptional.get().getLink());
+            AnaliseLink analiseLink = new AnaliseLink();
+            analiseLink.setData(LocalDate.now());
+            analiseLink.setLink(linkOptional.get());
+            analiseLinkService.save(analiseLink);
         }
+        return model;
+    }
+
+    @GetMapping("/analise/{id}")
+    public ModelAndView informacoesLink(@PathVariable(value = "id") String id){
+        ModelAndView model = new ModelAndView("/link/analise");
+
+        Optional<Link> linkOptional = linkService.findById(id);
+
+        if(linkOptional.isEmpty()){
+            model.addObject("mensagem", "Link não encontrado");
+        }else{
+            model.addObject("link", linkOptional.get());
+            String cliques = String.valueOf(analiseLinkService.findAnaliseLinksByLinkId(id).size());
+            String cliquesDiario = String.valueOf(analiseLinkService.findAnaliseLinksDiarioByLinkIdAndData(id, LocalDate.now()).size());
+            System.out.println(cliques + " | " + cliquesDiario);
+            model.addObject("cliquesTotais", cliques);
+            model.addObject("cliquesHoje", cliquesDiario);
+        }
+
         return model;
     }
 

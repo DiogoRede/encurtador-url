@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gráfico de Links</title>
+
+    <!-- Criador de graficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+
+</head>
+<body>
+
+    <div th:replace="~{/header.html}"></div>
+
+    <h1 class="text-center">Analise do link</h1>
+
+    <div class="container mt-5">
+        <!-- Card -->
+        <div class="card">
+            <!-- Card Body -->
+            <div class="card-body">
+                <!-- Lado Esquerdo - Dados Padrão do Link -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="card-title text-center">Detalhes do Link</h5>
+                        <!-- <p th:text="${'ID: ' + link.id}"></p> -->
+                        <p th:text="${'Link Original: ' + link.link}"></p>
+                        <p th:text="${'Link Encurtado: localhost:8080/link/' + link.linkencurtado}"></p>
+                        <p th:text="${'Criado por: ' + link.usuario.email}"></p>
+                    </div>
+
+                    <!-- Lado Direito - Gráfico de Cliques -->
+                    <div class="col-md-6">
+                        <h5 class="card-title text-center">Gráfico de Cliques</h5>
+                        <canvas id="graficoCliques" width="200" height="100"></canvas>
+
+                        <script th:inline="javascript">
+                            /* Obtenha os dados do Thymeleaf */
+                            var cliquesTotais = /*[[${cliquesTotais}]]*/ 0;
+                            var cliquesHoje = /*[[${cliquesHoje}]]*/ 0;
+
+                            /* Configuração do gráfico de pizza */
+                            var ctx = document.getElementById('graficoCliques').getContext('2d');
+                            var myChart = new Chart(ctx, {
+                                type: 'pie',
+                                data: {
+                                    labels: ['Cliques Totais', 'Cliques Hoje'],
+                                    datasets: [{
+                                        data: [cliquesTotais, cliquesHoje],
+                                        backgroundColor: [
+                                            'rgba(75, 192, 192, 0.2)', // Cor de fundo para Cliques Totais
+                                            'rgba(255, 99, 132, 0.2)'  // Cor de fundo para Cliques Hoje
+                                        ],
+                                        borderColor: [
+                                            'rgba(75, 192, 192, 1)',  // Cor da borda para Cliques Totais
+                                            'rgba(255, 99, 132, 1)'   // Cor da borda para Cliques Hoje
+                                        ],
+                                        borderWidth: 1
+                                    }],
+                                }
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

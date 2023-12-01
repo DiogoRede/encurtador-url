@@ -46,7 +46,7 @@
                     </td>
                     <td>
                         <!-- Botão de informações -->
-                        <a th:href="@{/link/informacoes-link/{id}(id=${link.id})}">
+                        <a th:href="@{/link/analise/{id}(id=${link.id})}">
                             <button class="btn btn-info">Informações</button>
                         </a>
                     </td>
@@ -56,12 +56,10 @@
     </div>
 
     <!-- Caso a lista de links esteja vazia -->
-    <div th:if="${#lists.isEmpty(listLink)}">
-        <p>Nenhum link disponível.</p>
+    <div class="d-flex justify-content-center" th:if="${#lists.isEmpty(listLink)}">
+        <p>Você não tem nenhum link cadastrado</p>
     </div>
 
-    <!-- Option 1: Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
 </body>
 </html>

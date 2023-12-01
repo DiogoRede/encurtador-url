@@ -19,6 +19,15 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                    .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/", "/auth/**").permitAll()
+                                            
+                                                .requestMatchers("/link/cadastro").authenticated()
+                                                .requestMatchers("/link/minha-lista").authenticated()
+                                                .requestMatchers("/link/analise/{id}").authenticated()
+                                                .requestMatchers("/link/excluir/{id}").authenticated()
+                                                .requestMatchers("/link/analise/{id}").authenticated()
+
+                                                .requestMatchers("/link/{linkEncurtado}").permitAll()
+
                                                 .anyRequest().authenticated()
                                             )
                     .formLogin(
