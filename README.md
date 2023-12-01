@@ -17,5 +17,4 @@ Site para encurtar links e fazer um redirecionamento pelo próprio como intermed
 
 Aprender Frameworks do universo Spring.
 
-
 **Nota:** Projeto em desenvolvimento.

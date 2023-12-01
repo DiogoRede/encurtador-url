@@ -3,6 +3,7 @@ package com.diogorede.lighturl.controllers;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,27 @@ public class LinkController {
         return "/link/register";
     }
 
+    @GetMapping("/minha-lista")
+    public ModelAndView linkList(){
+        ModelAndView model = new ModelAndView();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails)principal).getUsername();
+            Optional<Usuario> usuarioOptional = usuarioService.buscarPorEmail(username);
+            if(usuarioOptional.isPresent()){
+                List<Link> links = linkService.findByLinksUsuario(username);
+                System.out.println(links.get(0).getLinkencurtado());
+                model.setViewName("link/list");
+                model.addObject("listLink", links);
+            }
+        }else {
+            model.setViewName("/auth/login");
+            model.addObject("mensagemErro", "Usuario não logado");
+        }
+        return model;
+    }
+
     @GetMapping("/{linkEncurtado}")
     public ModelAndView linkRedirect(@PathVariable(value = "linkEncurtado") String link){
         ModelAndView model = new ModelAndView("/link/redirect");
@@ -48,6 +70,17 @@ public class LinkController {
             model.addObject("link", linkOptional.get().getLink());
         }
         return model;
+    }
+
+    @PostMapping("/excluir/{id}")
+    public String excluirLink(@PathVariable(value = "id") String id){
+        ModelAndView model = new ModelAndView("/link/list");
+
+        linkService.delete(id);
+
+        model.addObject("mensagem", "Excluido com sucesso!");
+
+        return "redirect:/link/minha-lista";
     }
 
     @PostMapping("/cadastro")
@@ -101,7 +134,6 @@ public class LinkController {
         } else {
             model.setViewName("/auth/login");
         }
-
         return model;
     }
 }

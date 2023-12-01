@@ -1,5 +1,6 @@
 package com.diogorede.lighturl.services.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,11 @@ public class LinkServiceImpl implements LinkService{
     @Override
     public Optional<Link> findByLinkEncurtado(String link) {
         return linkRepository.findByLinkencurtado(link);
+    }
+
+    @Override
+    public List<Link> findByLinksUsuario(String id) {
+        return linkRepository.findByUsuarioEmail(id);
     }
     
 }

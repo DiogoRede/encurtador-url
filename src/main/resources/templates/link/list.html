@@ -13,24 +13,51 @@
 
     <div th:replace="~{/header.html}"></div>
 
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-6 offset-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        
-                        <!-- Verifica se o parâmetro 'link' está presente -->
-                        <th:block th:if="${link != null}">
-                            <!-- Exibe a tag <a> se o parâmetro 'link' estiver presente -->
-                            <a th:href="${link}" class="btn btn-secondary btn-lg">Click aqui para ser redirecionado</a>
-                        </th:block>
-    
-                        <!-- Outra tag ou mensagem a ser exibida se o parâmetro 'link' não estiver presente -->
-                        <p th:unless="${link != null}">Link não foi encontrado</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <h1 class="text-center">Lista de Links</h1>
+
+    <!-- Se houver uma mensagem, exiba-a -->
+    <div th:if="${mensagem}" class="alert" role="alert">
+        <p th:text="${mensagem}"></p>
+    </div>
+
+    <!-- Verifica se a lista de links não está vazia -->
+    <div th:if="${not #lists.isEmpty(listLink)}" class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Link Original</th>
+                    <th scope="col">Link Encurtado</th>
+                    <th scope="col">Deletar</th>
+                    <th scope="col">Informações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Itera sobre a lista de links -->
+                <tr th:each="link : ${listLink}">
+                    <td>
+                        <a th:href="${link.link}" th:text="${link.link}" target="_blank">Link</a>
+                    </td>
+                    <td th:text="'localhost:8080/link/' + ${link.linkencurtado}" scope="row"></td>
+                    <td>
+                        <!-- Botão de deletar -->
+                        <form method="post" th:action="@{'/link/excluir/' + ${link.id}}">
+                            <button type="submit" class="btn btn-danger">Excluir</button>
+                        </form>
+                    </td>
+                    <td>
+                        <!-- Botão de informações -->
+                        <a th:href="@{/link/informacoes-link/{id}(id=${link.id})}">
+                            <button class="btn btn-info">Informações</button>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Caso a lista de links esteja vazia -->
+    <div th:if="${#lists.isEmpty(listLink)}">
+        <p>Nenhum link disponível.</p>
     </div>
 
     <!-- Option 1: Bootstrap Bundle with Popper -->
